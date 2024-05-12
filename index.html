@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Notebook</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-image: url('background.png');
+        background-size: cover; /* Adjust the background image size */
+        background-repeat: repeat;
+        background-position: center center;
+    }
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    .noteTitle {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    #noteTitle{
+        width: calc(100% - 20px);
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    #noteArea {
+        width: calc(100% - 20px);
+        min-height: 200px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    .saveBtn, .deleteBtn {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .deleteBtn {
+        background-color: #f44336;
+    }
+    .uploadedImage {
+        max-width: 100%;
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+
+
+<div class="container" id="entryContainer">
+    <input type="text" id="noteTitle" placeholder="Title for your note...">
+    <textarea id="noteArea" placeholder="Write your notes here..."></textarea>
+    <input type="file" id="imageInput">
+    <button class="saveBtn" onclick="saveNote()">Save</button>
+</div>
+
+<div class="container" id="notesContainer">
+    <div id="savedNotes"></div>
+</div>
+
+<script>
+    // Function to save note to local storage
+    function saveNote() {
+        var title = document.getElementById('noteTitle').value;
+        var note = document.getElementById('noteArea').value;
+        var image = document.getElementById('imageInput').files[0];
+        
+        if (title.trim() === '') {
+            alert('Please enter a title for your note!');
+            return;
+        }
+        
+        var imageDataUrl = '';
+        if (image) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                imageDataUrl = e.target.result;
+                saveNoteToStorage(title, note, imageDataUrl);
+            };
+            reader.readAsDataURL(image);
+        } else {
+            saveNoteToStorage(title, note, imageDataUrl);
+        }
+    }
+
+    // Function to save note data to local storage
+    function saveNoteToStorage(title, note, imageDataUrl) {
+        var notes = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [];
+        var newNote = { title: title, text: note, image: imageDataUrl };
+        notes.push(newNote);
+        localStorage.setItem('notes', JSON.stringify(notes));
+        displayNotes();
+        document.getElementById('noteTitle').value = ''; // Clear the title input
+        document.getElementById('noteArea').value = ''; // Clear the text area
+        document.getElementById('imageInput').value = ''; // Clear the file input
+    }
+
+    // Function to display saved notes
+    function displayNotes() {
+        var notes = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [];
+        var notesList = '';
+        if (notes.length > 0) {
+            notesList += '<h2>Saved Notes:</h2>';
+            notes.forEach(function (note, index) {
+                notesList += '<div class="container noteBox">' +
+                                '<div class="noteTitle">' + note.title + '</div>' +
+                                '<textarea id="noteArea" readonly>' + note.text + '</textarea>';
+                if (note.image) {
+                    notesList += '<img class="uploadedImage" src="' + note.image + '" alt="Uploaded Image">';
+                }
+                notesList += '<button class="deleteBtn" onclick="deleteNote(' + index + ')">Delete</button>' +
+                             '</div>';
+            });
+        } else {
+            notesList = '<p>No notes saved yet.</p>';
+        }
+        document.getElementById('savedNotes').innerHTML = notesList;
+    }
+
+    // Function to delete note
+    function deleteNote(index) {
+        var notes = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [];
+        notes.splice(index, 1);
+        localStorage.setItem('notes', JSON.stringify(notes));
+        displayNotes();
+    }
+
+    // Load saved notes on page load
+    window.onload = function () {
+        displayNotes();
+    };
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
